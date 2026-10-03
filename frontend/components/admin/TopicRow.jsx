@@ -8,18 +8,18 @@ export default function TopicRow({ topic, onDeleteClick }) {
         <div className="flex items-center gap-3">
           <span className="text-xl">{topic.icon}</span>
           <div>
-            <p className="font-medium text-white">{topic.title}</p>
+            <p className="font-medium text-white">{topic.name}</p>
             <p className="text-xs text-gray-500">/{topic.slug}</p>
           </div>
         </div>
       </td>
       <td className="px-4 py-3 text-sm text-gray-400">{topic.description}</td>
-      <td className="px-4 py-3 text-sm text-gray-400">{topic.questionCount}</td>
-      <td className="px-4 py-3 text-sm text-gray-400">{topic.createdAt}</td>
+      <td className="px-4 py-3 text-sm text-gray-400">-</td>
+      <td className="px-4 py-3 text-sm text-gray-400">{new Date(topic.createdAt).toLocaleDateString()}</td>
       <td className="px-4 py-3">
         <div className="flex justify-end gap-2">
           <Link
-            href={`/admin/topics/${topic.id}/edit`}
+            href={`/admin/subject/${topic._id}/edit`}
             className="rounded-lg px-3 py-1.5 text-sm text-[#b480ff] hover:bg-[#b480ff]/10"
           >
             Edit

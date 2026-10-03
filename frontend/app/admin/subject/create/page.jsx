@@ -30,8 +30,9 @@ export default function CreateTopicPage() {
   return (
     <div>
       <h3 className="mb-6 text-lg font-semibold text-white">Create New Subject</h3>
+       {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
       <TopicForm onSubmit={handleCreate} submitLabel="Create Subject" />
-      {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
+     
     </div>
   );
 }

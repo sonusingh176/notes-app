@@ -1,29 +1,39 @@
 "use client";
-
+import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import QuestionForm from "@/components/admin/QuestionForm";
-import { dummyQuestions } from "@/lib/dummy-data";
+import { questionApi } from "@/lib/api";
 
-// Question edit karne wala page (Topics edit page jaisa hi pattern, useParams() use kiya hai).
 export default function EditQuestionPage() {
   const router = useRouter();
-  const params = useParams(); // { id: "101" }
+  const { id } = useParams();
+  const [question, setQuestion] = useState(null);
+  const [error, setError] = useState("");
 
-  const question = dummyQuestions.find((q) => q.id === params.id);
+  useEffect(() => {
+    questionApi.getAll()
+      .then((res) => {
+        const found = res.questions.find((q) => q._id === id);
+        setQuestion(found);
+      })
+      .catch(console.error);
+  }, [id]);
 
-  if (!question) {
-    return <p className="text-gray-400">Question not found.</p>;
-  }
-
-  const handleUpdate = (formData) => {
-    console.log("Updating question (dummy):", params.id, formData);
-    // TODO (Phase 4): real API call (PUT/PATCH) yahan aayega
-    router.push("/admin/questions");
+  const handleUpdate = async (formData) => {
+    try {
+      await questionApi.update(id, formData);
+      router.push("/admin/questions");
+    } catch (err) {
+      setError(err.message);
+    }
   };
+
+  if (!question) return <p className="text-gray-400">Loading...</p>;
 
   return (
     <div>
       <h3 className="mb-6 text-lg font-semibold text-white">Edit Question</h3>
+      {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
       <QuestionForm initialData={question} onSubmit={handleUpdate} submitLabel="Save Changes" />
     </div>
   );

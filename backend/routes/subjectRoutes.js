@@ -9,10 +9,11 @@ const router = express.Router();
 
 router.post('/create-subject', authenticate,createSubject);
 // router.post('/create-subject', authenticate, authorize('super_admin'), createSubject);
-
 router.get('/get-subject', authenticate, getAllSubjects);
 router.put('/update-subject/:id', authenticate, updateSubject);
 router.delete('/delete-subject/:id',authenticate, deleteSubject);
 
+
+router.get("/public", getAllSubjects);
 
 export default router;

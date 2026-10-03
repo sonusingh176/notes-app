@@ -1,11 +1,11 @@
 import Hero from "@/components/layout/Hero";
-import Categories from "@/components/layout/Categories";
+ import SubjectSection from "@/components/layout/SubjectSection";
 
 export default function Home() {
   return (
     <>
       <Hero />
-      <Categories />
+      <SubjectSection />
     </>
   );
 }

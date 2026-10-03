@@ -11,9 +11,9 @@ export default function QuestionRow({ question, onDeleteClick }) {
   return (
     <tr className="border-b border-white/5 last:border-0 hover:bg-white/5">
       <td className="px-4 py-3">
-        <p className="max-w-md truncate font-medium text-white">{question.question}</p>
+        <p className="max-w-md truncate font-medium text-white">{question.questionText}</p>
       </td>
-      <td className="px-4 py-3 text-sm text-gray-400">{question.topicTitle}</td>
+      <td className="px-4 py-3 text-sm text-gray-400">{question.subject?.name}</td>
       <td className="px-4 py-3">
         <span
           className={`rounded-full px-2.5 py-1 text-xs font-medium ${
@@ -27,7 +27,7 @@ export default function QuestionRow({ question, onDeleteClick }) {
       <td className="px-4 py-3">
         <div className="flex justify-end gap-2">
           <Link
-            href={`/admin/questions/${question.id}/edit`}
+            href={`/admin/questions/${question._id}/edit`}
             className="rounded-lg px-3 py-1.5 text-sm text-[#b480ff] hover:bg-[#b480ff]/10"
           >
             Edit

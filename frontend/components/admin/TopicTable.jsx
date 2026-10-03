@@ -2,6 +2,7 @@ import TopicRow from "./TopicRow";
 
 // Topics ki pure table — headers + rows
 export default function TopicTable({ topics, onDeleteClick }) {
+  console.log("topics:", topics);
   return (
     <div className="overflow-x-auto rounded-xl border border-white/10">
       <table className="w-full text-left">
@@ -16,7 +17,7 @@ export default function TopicTable({ topics, onDeleteClick }) {
         </thead>
         <tbody className="bg-[#1b2231]">
           {topics.map((topic) => (
-            <TopicRow key={topic.id} topic={topic} onDeleteClick={onDeleteClick} />
+            <TopicRow key={topic._id} topic={topic} onDeleteClick={onDeleteClick} />
           ))}
 
           {topics.length === 0 && (

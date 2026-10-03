@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { dummyTopics } from "@/lib/dummy-data";
+import { useState,useEffect } from "react";
+import { subjectApi } from "@/lib/api";
 
 // Shared form — Create aur Edit, dono pages isi ko use karenge.
 //
@@ -10,12 +10,21 @@ import { dummyTopics } from "@/lib/dummy-data";
 //   onSubmit     -> form submit hone par chalega, formData object ke saath
 //   submitLabel  -> button ka text
 export default function QuestionForm({ initialData = {}, onSubmit, submitLabel = "Save" }) {
-  const [form, setForm] = useState({
-    topicId: initialData.topicId || dummyTopics[0]?.id || "",
-    question: initialData.question || "",
-    answer: initialData.answer || "",
-    difficulty: initialData.difficulty || "Easy",
-  });
+  
+  const [subjects, setSubjects] = useState([]);
+
+  useEffect(() => {
+  subjectApi.getAll().then((res) => setSubjects(res.subjects));
+}, []);
+
+  // form state me:
+const [form, setForm] = useState({
+  topicId: initialData.subject?._id || initialData.subject || "",
+  questionText: initialData.questionText || "",   // question → questionText
+  answer: initialData.answer || "",
+  status: initialData.status || "active",
+  // difficulty nahi hai backend model me — hata do
+});
 
   const handleChange = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -23,7 +32,7 @@ export default function QuestionForm({ initialData = {}, onSubmit, submitLabel =
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(form);
+    onSubmit({ ...form, subject: form.topicId })
   };
 
   return (
@@ -36,19 +45,18 @@ export default function QuestionForm({ initialData = {}, onSubmit, submitLabel =
           required
           className="w-full rounded-lg border border-white/10 bg-[#1b2231] px-4 py-2.5 text-white outline-none focus:border-[#b480ff]"
         >
-          {dummyTopics.map((topic) => (
-            <option key={topic.id} value={topic.id}>
-              {topic.icon} {topic.title}
-            </option>
-          ))}
+       <option value="">-- Select Subject --</option>
+{subjects.map((s) => (
+  <option key={s._id} value={s._id}>{s.icon} {s.name}</option>
+))}
         </select>
       </div>
 
       <div>
         <label className="mb-1 block text-sm text-gray-300">Question</label>
         <textarea
-          value={form.question}
-          onChange={handleChange("question")}
+         value={form.questionText}
+onChange={handleChange("questionText")}
           required
           rows={2}
           placeholder="e.g. What is a closure in JavaScript?"
@@ -68,18 +76,6 @@ export default function QuestionForm({ initialData = {}, onSubmit, submitLabel =
         />
       </div>
 
-      <div>
-        <label className="mb-1 block text-sm text-gray-300">Difficulty</label>
-        <select
-          value={form.difficulty}
-          onChange={handleChange("difficulty")}
-          className="w-full rounded-lg border border-white/10 bg-[#1b2231] px-4 py-2.5 text-white outline-none focus:border-[#b480ff]"
-        >
-          <option value="Easy">Easy</option>
-          <option value="Medium">Medium</option>
-          <option value="Hard">Hard</option>
-        </select>
-      </div>
 
       <button
         type="submit"

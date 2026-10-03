@@ -71,10 +71,22 @@ export const authApi = {
 
 
 
-
+// Subject CRUD API
 export const subjectApi = {
   create: (data) => client.post("/subject/create-subject", data),
   getAll: () => client.get("/subject/get-subject"),
+  update: (id, data) => client.put(`/subject/update-subject/${id}`, data),
+  delete: (id) => client.delete(`/subject/delete-subject/${id}`),
+};
+
+
+// Questions CRUD API
+export const questionApi = {
+  create: (data) => client.post("/question/create-question", data),
+  getBySubject: (subjectId) => client.get(`/get-question/${subjectId}`),
+  getAll: () => client.get("/question/get-all-questions"), // backend me banana padega
+  update: (id, data) => client.put(`/question/update-question/${id}`, data),
+  delete: (id) => client.delete(`/delete-question/${id}`),
 };
 
 
@@ -86,4 +98,9 @@ export const jobApi = {
   updateStatus: (id, data) => client.patch(`/job-applications/${id}/status`, data),
   delete: (id) => client.delete(`/job-applications/${id}`),
   getStatuses: () => client.get("/job-applications/statuses"),
+};
+
+export const publicApi = {
+  getSubjects: () => client.get("/subject/public"),
+  getQuestions: (subjectId) => client.get(`/question/public/${subjectId}`),
 };

@@ -11,10 +11,10 @@ import { useState } from "react";
 //   submitLabel  -> button ka text (e.g. "Create Topic" / "Save Changes")
 export default function TopicForm({ initialData = {}, onSubmit, submitLabel = "Save" }) {
   const [form, setForm] = useState({
-    title: initialData.title || "",
-    slug: initialData.slug || "",
-    description: initialData.description || "",
-    icon: initialData.icon || "📁",
+      name: initialData.name || "",       // ← title nahi, name
+      slug: initialData.slug || "",
+      description: initialData.description || "",
+      icon: initialData.icon || "📁",
   });
 
   // generic change handler — sabhi inputs isi ek function se update honge
@@ -25,7 +25,7 @@ export default function TopicForm({ initialData = {}, onSubmit, submitLabel = "S
       // title type karte waqt slug automatically generate ho jaaye (sirf jab user ne
       // slug ko khud kabhi manually edit nahi kiya — yahan simplicity ke liye hamesha
       // auto-generate kar rahe hain jab tak slug field khud edit na ho)
-      if (field === "title") {
+      if (field === "name") {
         next.slug = value
           .toLowerCase()
           .trim()
@@ -47,8 +47,8 @@ export default function TopicForm({ initialData = {}, onSubmit, submitLabel = "S
         <label className="mb-1 block text-sm text-gray-300">Title</label>
         <input
           type="text"
-          value={form.title}
-          onChange={handleChange("title")}
+          value={form.name}
+          onChange={handleChange("name")}
           required
           placeholder="e.g. JavaScript"
           className="w-full rounded-lg border border-white/10 bg-[#1b2231] px-4 py-2.5 text-white outline-none focus:border-[#b480ff]"

@@ -1,7 +1,8 @@
 import QuestionRow from "./QuestionRow";
 
-// Questions ki pure table — headers + rows
+
 export default function QuestionTable({ questions, onDeleteClick }) {
+
   return (
     <div className="overflow-x-auto rounded-xl border border-white/10">
       <table className="w-full text-left">
@@ -16,7 +17,7 @@ export default function QuestionTable({ questions, onDeleteClick }) {
         </thead>
         <tbody className="bg-[#1b2231]">
           {questions.map((q) => (
-            <QuestionRow key={q.id} question={q} onDeleteClick={onDeleteClick} />
+            <QuestionRow key={q._id} question={q} onDeleteClick={onDeleteClick} />
           ))}
 
           {questions.length === 0 && (

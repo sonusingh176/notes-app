@@ -33,7 +33,25 @@ const createSubject =async(req, res, next)=>{
 const getAllSubjects =async(req, res, next)=>{
      try {
 
-        const subjects = await Subject.find().sort({ createdAt: -1 });
+        // const subjects = await Subject.find().sort({ createdAt: -1 });
+        const subjects = await Subject.aggregate([
+  {
+    $lookup: {
+      from: "questions",
+      localField: "_id",
+      foreignField: "subject",
+      as: "questions"
+    }
+  },
+  {
+    $addFields: {
+      questionCount: { $size: "$questions" }
+    }
+  },
+  {
+    $project: { questions: 0 } // questions array hide karo, sirf count chahiye
+  }
+]).sort({ createdAt: -1 });
        
         res.status(200).json({
             success:true,

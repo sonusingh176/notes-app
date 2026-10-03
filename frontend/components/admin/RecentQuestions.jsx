@@ -22,16 +22,12 @@ export default function RecentQuestions({ questions }) {
         {questions.map((q) => (
           <div key={q.id} className="flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-white">{q.question}</p>
-              <p className="text-xs text-gray-500">{q.topicTitle}</p>
+              <p className="truncate text-sm font-medium text-white">{q.questionText}</p>
+              <p className="text-xs text-gray-500">{q.subject?.name}</p>
             </div>
-            <span
-              className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
-                difficultyColor[q.difficulty] || "bg-white/10 text-gray-300"
-              }`}
-            >
-              {q.difficulty}
-            </span>
+          <span className={`... ${q.status === "active" ? "bg-green-500/15 text-green-400" : "bg-gray-500/15 text-gray-400"}`}>
+  {q.status}
+</span>
           </div>
         ))}
 

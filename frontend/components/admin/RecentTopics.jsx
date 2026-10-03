@@ -2,6 +2,7 @@ import Link from "next/link";
 
 // Dashboard ke "Recent Topics" section ke liye chhoti list
 export default function RecentTopics({ topics }) {
+  console.log(topics)
   return (
     <div className="rounded-xl border border-white/10 bg-[#1b2231] p-5">
       <div className="mb-4 flex items-center justify-between">
@@ -17,8 +18,8 @@ export default function RecentTopics({ topics }) {
             <div className="flex items-center gap-3">
               <span className="text-xl">{topic.icon}</span>
               <div>
-                <p className="text-sm font-medium text-white">{topic.title}</p>
-                <p className="text-xs text-gray-500">{topic.questionCount} questions</p>
+                <p className="text-sm font-medium text-white">{topic.name}</p>
+                <p className="text-xs text-gray-500">{topic.questionCount ?? "—"} questions</p>
               </div>
             </div>
             <span className="text-xs text-gray-500">{topic.createdAt}</span>

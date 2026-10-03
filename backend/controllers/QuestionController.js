@@ -44,9 +44,9 @@ const getQuestionsBySubject = async (req, res, next)=>{
             });
         }
  
-        if (subject.status !== 'active') {
-            return res.status(404).json({ success: false, message: "???" }); // socho kya message sahi rahega
-        }
+        // if (subject.status !== 'active') {
+        //     return res.status(404).json({ success: false, message: "???" }); // socho kya message sahi rahega
+        // }
 
         const questions= await Question.find({subject:id}).sort({ createdAt: -1});
 
@@ -129,4 +129,19 @@ const deleteQuestion = async(req, res, next)=>{
     }
 }
 
-export {createQuestion , getQuestionsBySubject ,updateQuestion,deleteQuestion}
+const getAllQuestions = async (req, res, next) => {
+  try {
+    const questions = await Question.find()
+      .populate("subject", "name") // subject ka naam bhi aaye
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      questions,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { createQuestion, getQuestionsBySubject, getAllQuestions, updateQuestion, deleteQuestion };
