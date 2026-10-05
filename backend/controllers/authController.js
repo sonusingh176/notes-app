@@ -1,5 +1,6 @@
 'use strict';
 
+
 // ─────────────────────────────────────────────────────────────────────────────
 // controllers/authController.js
 // Auth flow ka actual business logic yahan hai: register, login, aur
@@ -9,6 +10,10 @@
 
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { OAuth2Client } from "google-auth-library";
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 
 /**
  * signToken (helper function)
@@ -83,6 +88,14 @@ const login = async (req, res, next) => {
 
     const user = await User.findOne({ email }).select('+password');
 
+
+    // if (user.authProvider === 'google') {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'Login With Google.',
+    //   });
+    // }
+
     // Security tip: email exist nahi karta aur password galat hai — dono
     // cases me SAME error message bhejo, taaki koi guess na kar sake ki
     // ye email database me hai ya nahi
@@ -113,6 +126,46 @@ const login = async (req, res, next) => {
   }
 };
 
+
+
+const googleLogin = async(req,res,next)=>{
+  try {
+    const {credential }=req.body;
+
+    // Google se token verify karo (fake token yahin pakda jayega)
+    const ticket = await googleClient.verifyIdToken({
+      idToken:credential,
+      audience:process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const {email,name,sub,email_verified}=ticket.getPayload();
+
+     if (!email_verified) {
+      return res.status(401).json({ success: false, message: "Google email verified nahi hai." });
+    }
+
+    // Email se user dhundo, nahi mila to naya banao
+    let user = await User.findOne({ email });
+
+    if(!user){
+      user=await User.create({name,email,googleId:sub, authProvider: "google" });
+
+    }else if(!user.googleId) {
+      // purana email/password user: Google account link kar do
+      user.googleId = sub;
+      await user.save();
+    }
+
+    // Token wahi helper se banao jo login() me use hota hai
+    const token = signToken(user._id);
+    res.json({ success: true, token, user });
+
+
+  } catch (error) {
+     next(error);
+  }
+}
+
 /**
  * GET /api/auth/me
  * --------------------
@@ -126,4 +179,4 @@ const getMe = async (req, res) => {
   res.json({ success: true, user: req.user });
 };
 
-export { register, login, getMe };
+export { register, login, getMe ,googleLogin};

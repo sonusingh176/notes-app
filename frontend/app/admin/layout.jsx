@@ -6,8 +6,10 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function AdminLayout({ children }) {
+
   const { loading, user, isAuthenticated } = useAuth();
   const router = useRouter();
+
 
   useEffect(() => {
     if (!loading && (!isAuthenticated ||  user?.role !== "super_admin")) {
@@ -23,7 +25,8 @@ export default function AdminLayout({ children }) {
     );
   }
 
-  if (!isAuthenticated) return null;
+  
+  if (!isAuthenticated || user?.role !== "super_admin") return null;
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#0f1524]">

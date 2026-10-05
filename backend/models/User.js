@@ -33,12 +33,32 @@ const userSchema = new mongoose.Schema(
       lowercase: true, // "User@Mail.com" aur "user@mail.com" ko same treat karega
       match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email'],
     },
+    //BEFORE GOOGLE LOGIN
+    // password: {
+    //   type: String,
+    //   required: [true, 'Password is required'],
+    //   minlength: 6,
+    //   select: false, // IMPORTANT: normal queries me password field return NAHI hogi
+    // (jab chahiye ho, jaise login me, tab explicitly .select('+password') likhna padega)
+    // },
     password: {
       type: String,
-      required: [true, 'Password is required'],
+      // Google user ka password nahi hota, isliye sirf "local" signup me zaroori hai
+      required: [
+        function () { return this.authProvider === 'local'; },
+        'Password is required',
+      ],
       minlength: 6,
-      select: false, // IMPORTANT: normal queries me password field return NAHI hogi
-      // (jab chahiye ho, jaise login me, tab explicitly .select('+password') likhna padega)
+      select: false,
+    },
+    googleId: {
+      type: String, // Google ka unique user id (sub)
+      default: null,
+    },
+    authProvider: {
+      type: String,
+      enum: ['local', 'google'],
+      default: 'local', // purane saare users automatically "local" maane jaayenge
     },
     role: {
       // sirf yahi 2 values allowed hain
@@ -76,6 +96,7 @@ const userSchema = new mongoose.Schema(
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next(); // password change nahi hua, kuch mat karo
+                 // password nahi hai (Google user) ya change nahi hua
   }
 
   this.password = await bcrypt.hash(this.password, 12); // 12 = salt rounds

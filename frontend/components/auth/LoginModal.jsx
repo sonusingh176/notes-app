@@ -2,12 +2,13 @@
 import { useState } from "react";
 import {authApi,setToken} from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { GoogleLogin } from "@react-oauth/google";
 
 
 
-export default function LoginModal({ openModal, setOpenModal }) {
+export default function LoginModal({ openModal, setOpenModal,onSwitchToRegister }) {
   if (!openModal) return null;
-  const { login,setUser } = useAuth();
+  const { login,setUser ,googleLogin } = useAuth();
 
 
   const [formData,setFormData]=useState({
@@ -122,7 +123,7 @@ export default function LoginModal({ openModal, setOpenModal }) {
 
         <p className="mt-4 text-center text-sm text-gray-400">
           Need an account?{" "}
-          <button className="text-white hover:underline">
+          <button onClick={onSwitchToRegister} className="text-white hover:underline">
             Sign up
           </button>
         </p>
@@ -137,9 +138,24 @@ export default function LoginModal({ openModal, setOpenModal }) {
           <div className="h-px flex-1 bg-gray-700"></div>
         </div>
 
-        <button className="w-full rounded-lg bg-white py-2.5 font-semibold text-black hover:bg-gray-100">
+        {/* <button className="w-full rounded-lg bg-white py-2.5 font-semibold text-black hover:bg-gray-100">
           Continue with Google
-        </button>
+        </button> */}
+
+        <div className="flex justify-center">
+  <GoogleLogin
+    theme="outline"
+    onSuccess={async (res) => {
+      try {
+        await googleLogin(res.credential); // Google ka ID token backend ko bhejo
+        setOpenModal(false);
+      } catch (err) {
+        setError(err.message);
+      }
+    }}
+    onError={() => setError("Google login failed")}
+  />
+</div>
 
       </div>
     </div>

@@ -66,6 +66,7 @@ client.interceptors.response.use(
 export const authApi = {
   register: (payload) => client.post("/auth/register", payload),
   login: (payload) => client.post("/auth/login", payload),
+  google: (credential) => client.post("/auth/google", { credential }),
   me: () => client.get("/auth/me"),
 };
 

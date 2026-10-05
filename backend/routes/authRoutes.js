@@ -11,7 +11,7 @@
 import express from 'express';
 import { body } from 'express-validator';
 
-import { register, login, getMe } from '../controllers/authController.js';
+import { register, login, getMe , googleLogin} from '../controllers/authController.js';
 import { authenticate } from '../middleware/auth.js';
 import { validateRequest } from '../middleware/errorHandler.js';
 import { loginValidation } from '../validators/auth.validator.js';
@@ -53,6 +53,8 @@ router.post(
   validateRequest,
   login
 );
+
+router.post("/google", googleLogin);
 
 
 // GET /api/auth/me — apna profile dekhne ke liye

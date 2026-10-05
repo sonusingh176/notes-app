@@ -3,18 +3,26 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "@/app/page.module.css";
 import LoginModal from "@/components/auth/LoginModal";
+import RegistrationModal from "@/components/auth/RegistrationModal";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 
 export default function AppHeader() {
-  const [openModal, setOpenModal] = useState(false);
+
+  const [openLogin, setOpenLogin] = useState(false);
+  const [openRegister, setOpenRegister] = useState(false);
   const { user, isAuthenticated, logout, loading } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
 
   const handleTrackJob = () => {
     if (isAuthenticated) router.push("/dashboard");
-    else setOpenModal(true);
+     else setOpenLogin(true);
+  };
+
+  const switchToRegister = () => {
+    setOpenLogin(false);
+    setOpenRegister(true);
   };
 
   return (
@@ -41,12 +49,13 @@ export default function AppHeader() {
                 <button className={styles.loginBtn} onClick={logout}>Logout</button>
               </div>
             ) : (
-              <button className={styles.loginBtn} onClick={() => setOpenModal(true)}>Login</button>
+              <button className={styles.loginBtn} onClick={() => setOpenLogin(true)}>Login</button>
             )}
           </div>
         </div>
       </nav>
-      <LoginModal openModal={openModal} setOpenModal={setOpenModal} />
+      <LoginModal openModal={openLogin} setOpenModal={setOpenLogin} onSwitchToRegister={switchToRegister} />
+      <RegistrationModal openModal={openRegister} setOpenModal={setOpenRegister} />
     </>
   );
 }
