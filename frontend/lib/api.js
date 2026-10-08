@@ -105,3 +105,17 @@ export const publicApi = {
   getSubjects: () => client.get("/subject/public"),
   getQuestions: (subjectId) => client.get(`/question/public/${subjectId}`),
 };
+
+// AI Assistant API
+// -----------------------------------------------------------------------------
+// Chatbot se related saari API calls yahan rakhenge.
+//
+// `client` already has an Axios interceptor which automatically adds:
+// Authorization: Bearer <token>
+//
+// Isliye chatbot request ke saath hume manually token bhejne ki zarurat nahi.
+// -----------------------------------------------------------------------------
+
+export const aiApi={
+  ask:(question)=>client.post('ai/ask',{question}),
+}
