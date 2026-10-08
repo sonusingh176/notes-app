@@ -44,7 +44,6 @@ const askAI = async (req, res, next) => {
 
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | SEND USER QUESTION TO OPENAI
