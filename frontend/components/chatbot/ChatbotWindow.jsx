@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Bot, Send, X } from "lucide-react";
 
+import { aiApi } from "@/lib/api";
+
 /*
  * Basic chat window.
  *
@@ -12,6 +14,16 @@ import { Bot, Send, X } from "lucide-react";
  */
 export default function ChatbotWindow({ onClose }) {
   const [message, setMessage] = useState("");
+
+ /*
+  |--------------------------------------------------------------------------
+  | CHAT MESSAGES
+  |--------------------------------------------------------------------------
+  |
+  | Initially the AI sends a greeting.
+  |
+  |--------------------------------------------------------------------------
+  */
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -20,35 +32,88 @@ export default function ChatbotWindow({ onClose }) {
     },
   ]);
 
-  const handleSubmit = (event) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const text = message.trim();
-    if (!text) return;
+    const text = message.trim(); // Remove unnecessary spaces.
+    if (!text || isLoading) return;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Add user's message to UI immediately.
+    |--------------------------------------------------------------------------
+    |
+    | We don't wait for the backend before displaying it.
+    |
+    |--------------------------------------------------------------------------
+    */
+
+
+    const userMessage={
+       id: Date.now(),//is NOT the user's ID
+       role: "user",
+       content: text,
+    }
 
     // Add the user's message to the chat.
     setMessages((previous) => [
       ...previous,
-      {
-        id: Date.now(),
-        role: "user",
-        content: text,
-      },
+       userMessage,
     ]);
 
-    setMessage("");
+    setMessage("");//Clear input box.
+
+    setIsLoading(true);
+
+    try {
+        const response = await aiApi.ask(text);
+
+        const assistantMessage = {
+            id: Date.now() + 1,
+            role: "assistant",
+            content:
+            response?.answer ||
+            "I couldn't generate an answer.",
+        };
+        //Add AI response to chat.
+        setMessages((previous) => [
+            ...previous,
+            assistantMessage,
+        ])
+
+    } catch (error) {
+          console.error("AI Assistant Error:", error);
+          const errorMessage = {
+            id: Date.now() + 1,
+            role: "assistant",
+            content:
+            error?.message ||
+            "Something went wrong. Please try again.",
+        };
+
+         setMessages((previous) => [
+            ...previous,
+            errorMessage,
+        ]);
+    } finally {
+         setIsLoading(false);
+    }
 
     // Temporary response until the backend AI API is connected.
-    setTimeout(() => {
-      setMessages((previous) => [
-        ...previous,
-        {
-          id: Date.now() + 1,
-          role: "assistant",
-          content: "I received your message. AI integration will be connected next.",
-        },
-      ]);
-    }, 400);
+    // setTimeout(() => {
+    //   setMessages((previous) => [
+    //     ...previous,
+    //     {
+    //       id: Date.now() + 1,
+    //       role: "assistant",
+    //       content: "I received your message. AI integration will be connected next.",
+    //     },
+    //   ]);
+    // }, 400);
   };
 
   return (
@@ -100,6 +165,46 @@ export default function ChatbotWindow({ onClose }) {
             </div>
           </div>
         ))}
+
+         {/* LOADING MESSAG */}
+        {isLoading && (
+
+          <div className="flex justify-start">
+
+            <div
+              className="
+                rounded-2xl
+                rounded-bl-md
+
+                border
+                border-[var(--border)]
+
+                bg-[var(--bg-card)]
+
+                px-4
+                py-3
+
+                text-sm
+                text-[var(--text-secondary)]
+              "
+            >
+
+              <div className="flex items-center gap-1">
+
+                <span>Thinking</span>
+
+                <span className="animate-pulse">
+                  ...
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        )}
+
       </div>
 
       {/* Message input */}
@@ -113,6 +218,7 @@ export default function ChatbotWindow({ onClose }) {
             value={message}
             onChange={(event) => setMessage(event.target.value)}
             placeholder="Ask something..."
+            disabled={isLoading}
             className="min-w-0 flex-1 bg-transparent px-2 text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-secondary)]"
           />
 
@@ -120,7 +226,7 @@ export default function ChatbotWindow({ onClose }) {
             type="submit"
             aria-label="Send message"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--accent)] text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={!message.trim()}
+            disabled={!message.trim()|| isLoading}
           >
             <Send size={17} />
           </button>
