@@ -22,11 +22,11 @@
 // 6. startServer()                       ← database connect karke tab
 //                                          jaake app.listen() chalta hai
 // ─────────────────────────────────────────────────────────────────────────────
-
-import dotenv from 'dotenv';
-dotenv.config(); // .env file ko process.env me load karo — sabse pehle, kyunki
+import 'dotenv/config';
+//import dotenv from 'dotenv';
+//dotenv.config(); // .env file ko process.env me load karo — sabse pehle, kyunki
 // niche wali imports (jaise connectDB) ko turant process.env.MONGO_URI chahiye
-
+console.log("API KEY EXISTS:", !!process.env.OPENAI_API_KEY);
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -36,7 +36,9 @@ import authRoutes from './routes/authRoutes.js';
 import subjectRoutes from './routes/subjectRoutes.js';
 import questionRoutes from './routes/questionRoutes.js'
 import jobApplicationRoutes  from './routes/JobApplicationRoutes.js';
+import aiRoutes from './routes/aiRoutes.js';
 import { errorHandler } from './middleware/errorHandler.js';
+
 
 const app = express();
 
@@ -66,7 +68,8 @@ app.use('/api/question',questionRoutes);
 app.use('/api/job-applications', jobApplicationRoutes);
 
 
-
+// AI routes
+app.use('/api/ai', aiRoutes);
 
 // ── 404 ───────────────────────────────────────────────────────────────────────
 // jo bhi route upar match nahi hua, uske liye ye chalega

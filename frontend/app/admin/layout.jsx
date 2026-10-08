@@ -2,6 +2,8 @@
 import Sidebar from "@/components/admin/Sidebar";
 import Header from "@/components/admin/Header";
 import { useAuth } from "@/context/AuthContext";
+import Chatbot from "@/components/chatbot/Chatbot";
+
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -34,6 +36,12 @@ export default function AdminLayout({ children }) {
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header />
         <main className="flex-1 overflow-y-auto p-6 lg:p-8">{children}</main>
+      
+          {/*
+         * This layout wraps all admin pages, so admins also get
+         * the same AI chatbot UI on every page.
+         */}
+        <Chatbot />
       </div>
     </div>
   );

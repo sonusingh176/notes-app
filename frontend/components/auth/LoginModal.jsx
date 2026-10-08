@@ -143,19 +143,19 @@ export default function LoginModal({ openModal, setOpenModal,onSwitchToRegister 
         </button> */}
 
         <div className="flex justify-center">
-  <GoogleLogin
-    theme="outline"
-    onSuccess={async (res) => {
-      try {
-        await googleLogin(res.credential); // Google ka ID token backend ko bhejo
-        setOpenModal(false);
-      } catch (err) {
-        setError(err.message);
-      }
-    }}
-    onError={() => setError("Google login failed")}
-  />
-</div>
+            <GoogleLogin
+              theme="outline"
+              onSuccess={async (res) => {
+                try {
+                  await googleLogin(res.credential); // Google ka ID token backend ko bhejo
+                  setOpenModal(false);
+                } catch (err) {
+                  setError(err.message);
+                }
+              }}
+              onError={() => setError("Google login failed")}
+            />
+          </div>
 
       </div>
     </div>

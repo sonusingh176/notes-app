@@ -11,6 +11,7 @@ import {
 
  import { authenticate } from "../middleware/auth.js";
 
+
  const router = express.Router();
 
 
@@ -27,6 +28,8 @@ router.put("/:id", authenticate, updateApplication);
 router.patch("/:id/status", authenticate, updateApplicationStatus);
 
 router.delete("/:id", authenticate, deleteApplication);
+
+
 
 
 
