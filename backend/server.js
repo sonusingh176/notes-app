@@ -26,7 +26,7 @@ import 'dotenv/config';
 //import dotenv from 'dotenv';
 //dotenv.config(); // .env file ko process.env me load karo — sabse pehle, kyunki
 // niche wali imports (jaise connectDB) ko turant process.env.MONGO_URI chahiye
-console.log("API KEY EXISTS:", !!process.env.OPENAI_API_KEY);
+// console.log("API KEY EXISTS:", !!process.env.OPENAI_API_KEY);
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
