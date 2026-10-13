@@ -22,7 +22,13 @@ function buildInstructions() {
     "'Last week' means the previous full week, Monday to Sunday. " +
     "Always pass dates as YYYY-MM-DD. " +
     "For counts of applications, always use the count_application tool. " +
-    "Never ask the user for their user ID."
+    "Never ask the user for their user ID."+
+
+    "For counts of applications, always use the count_application tool. " +
+    "For details of latest/recent applications, use the get_recent_applications tool. " +
+    // WHY: tool na ho to LLM user se data maangne lagta hai, ye line us behavior ko rokti hai
+    "If no tool can answer the question, say you cannot do that yet. " +
+    "Never ask the user to provide their application data or their user ID."
   );
 }
 
