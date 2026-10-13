@@ -1,4 +1,4 @@
-import JobApplication from "../models/JobApplication.js";
+// import JobApplication from "../models/JobApplication.js";
 
 /*
 |--------------------------------------------------------------------------
@@ -19,75 +19,75 @@ import JobApplication from "../models/JobApplication.js";
 |--------------------------------------------------------------------------
 */
 
-export async function countApplications(userId,{ fromDate, toDate, status } = {}) {
+// export async function countApplications(userId,{ fromDate, toDate, status } = {}) {
 
-    // Start with the most important security filter.
-    // Only this logged-in user's applications can be counted.
-    const filter = {
-        user: userId
-    };
+//     // Start with the most important security filter.
+//     // Only this logged-in user's applications can be counted.
+//     const filter = {
+//         user: userId
+//     };
 
-    /*
-    |--------------------------------------------------------------------------
-    | DATE FILTER
-    |--------------------------------------------------------------------------
-    |
-    | Example:
-    |
-    | fromDate = "2026-10-01"
-    | toDate   = "2026-10-07"
-    |
-    | MongoDB will return applications between these dates.
-    |
-    |--------------------------------------------------------------------------
-    */
+//     /*
+//     |--------------------------------------------------------------------------
+//     | DATE FILTER
+//     |--------------------------------------------------------------------------
+//     |
+//     | Example:
+//     |
+//     | fromDate = "2026-10-01"
+//     | toDate   = "2026-10-07"
+//     |
+//     | MongoDB will return applications between these dates.
+//     |
+//     |--------------------------------------------------------------------------
+//     */
 
-    if (fromDate || toDate) {
+//     if (fromDate || toDate) {
 
-        filter.appliedDate = {};
+//         filter.appliedDate = {};
 
-        // Start date
-        if (fromDate) {
-            filter.appliedDate.$gte = new Date(`${fromDate}T00:00:00.000Z`);
-        }
+//         // Start date
+//         if (fromDate) {
+//             filter.appliedDate.$gte = new Date(`${fromDate}T00:00:00.000Z`);
+//         }
 
-        // End date
-        if (toDate) {
-            filter.appliedDate.$lte = new Date(`${toDate}T23:59:59.999Z`);
-        }
-    }
+//         // End date
+//         if (toDate) {
+//             filter.appliedDate.$lte = new Date(`${toDate}T23:59:59.999Z`);
+//         }
+//     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | STATUS FILTER
-    |--------------------------------------------------------------------------
-    |
-    | Example:
-    |
-    | "How many applications were rejected?"
-    |
-    | AI can send:
-    |
-    | status = "rejected"
-    |
-    |--------------------------------------------------------------------------
-    */
+//     /*
+//     |--------------------------------------------------------------------------
+//     | STATUS FILTER
+//     |--------------------------------------------------------------------------
+//     |
+//     | Example:
+//     |
+//     | "How many applications were rejected?"
+//     |
+//     | AI can send:
+//     |
+//     | status = "rejected"
+//     |
+//     |--------------------------------------------------------------------------
+//     */
 
-    if (status) {
-        filter.currentStatus = status;
-    }
+//     if (status) {
+//         filter.currentStatus = status;
+//     }
 
-    // Ask MongoDB for the number of matching applications.
-    const count = await JobApplication.countDocuments(filter);
+//     // Ask MongoDB for the number of matching applications.
+//     const count = await JobApplication.countDocuments(filter);
 
-    // Return structured data.
-    return {
-        count,
-        fromDate: fromDate || null,
-        toDate: toDate || null,
-        status: status || null
-    };
-}
+//     // Return structured data.
+//     return {
+//         count,
+//         fromDate: fromDate || null,
+//         toDate: toDate || null,
+//         status: status || null
+//     };
+// }
 
 
 /*
@@ -108,87 +108,88 @@ export async function countApplications(userId,{ fromDate, toDate, status } = {}
 |--------------------------------------------------------------------------
 */
 
-export const countApplicationTool = {
+// export const countApplicationTool = {
 
-    // OpenAI identifies the tool using this name.
-    type: "function",
+//     // OpenAI identifies the tool using this name.
+//     type: "function",
 
-    name: "count_application",
+//     name: "count_application",
 
-    /*
-    |--------------------------------------------------------------------------
-    | DESCRIPTION
-    |--------------------------------------------------------------------------
-    |
-    | The AI reads this description and decides whether this tool
-    | is useful for the user's question.
-    |
-    |--------------------------------------------------------------------------
-    */
+//     /*
+//     |--------------------------------------------------------------------------
+//     | DESCRIPTION
+//     |--------------------------------------------------------------------------
+//     |
+//     | The AI reads this description and decides whether this tool
+//     | is useful for the user's question.
+//     |
+//     |--------------------------------------------------------------------------
+//     */
 
-    description:
-        "Count the logged-in user's job applications. " +
-        "Use this when the user asks how many jobs they applied for, " +
-        "how many applications they have in a date range, " +
-        "or how many applications have a specific status.",
+//     description:
+//         "Count the logged-in user's job applications. " +
+//         "Use this when the user asks how many jobs they applied for, " +
+//         "how many applications they have in a date range, " +
+//         "or how many applications have a specific status.",
 
-    /*
-    |--------------------------------------------------------------------------
-    | STRICT MODE
-    |--------------------------------------------------------------------------
-    |
-    | strict: true tells the model to follow this schema exactly.
-    |
-    |--------------------------------------------------------------------------
-    */
+//     /*
+//     |--------------------------------------------------------------------------
+//     | STRICT MODE
+//     |--------------------------------------------------------------------------
+//     |
+//     | strict: true tells the model to follow this schema exactly.
+//     |
+//     |--------------------------------------------------------------------------
+//     */
 
-    strict: true,
+//     strict: true,
 
-    parameters: {
+//     parameters: {
 
-        type: "object",
+//         type: "object",
 
-        properties: {
+//         properties: {
 
-            fromDate: {
-                type: ["string", "null"],
-                description:
-                    "Start date in YYYY-MM-DD format. " +
-                    "Use null when there is no start date."
-            },
+//             fromDate: {
+//                 type: ["string", "null"],
+//                 description:
+//                     "Start date in YYYY-MM-DD format. " +
+//                     "Use null when there is no start date."
+//             },
 
-            toDate: {
-                type: ["string", "null"],
-                description:
-                    "End date in YYYY-MM-DD format. " +
-                    "Use null when there is no end date."
-            },
+//             toDate: {
+//                 type: ["string", "null"],
+//                 description:
+//                     "End date in YYYY-MM-DD format. " +
+//                     "Use null when there is no end date."
+//             },
 
-            status: {
-                type: ["string", "null"],
-                enum: [
-                    "applied",
-                    "interview_scheduled",
-                    "interview_completed",
-                    "offered",
-                    "rejected",
-                    "withdrawn",
-                    null
-                ],
-                description:
-                    "Application status to filter by. " +
-                    "Use null when status is not specified."
-            }
-        },
+//             status: {
+//                 type: ["string", "null"],
+//                 enum: [
+//                     "applied",
+//                     "interview_scheduled",
+//                     "interview_completed",
+//                     "offered",
+//                     "rejected",
+//                     "withdrawn",
+//                     null
+//                 ],
+//                 description:
+//                     "Application status to filter by. " +
+//                     "Use null when status is not specified."
+//             }
+//         },
 
-        // Because strict mode is enabled, all properties are required.
-        required: [
-            "fromDate",
-            "toDate",
-            "status"
-        ],
+//         // Because strict mode is enabled, all properties are required.
+//         required: [
+//             "fromDate",
+//             "toDate",
+//             "status"
+//         ],
 
-        // Prevent the AI from sending unexpected properties.
-        additionalProperties: false
-    }
-};
+//         // Prevent the AI from sending unexpected properties.
+//         additionalProperties: false
+//     }
+// };
+
