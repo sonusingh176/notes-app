@@ -22,7 +22,19 @@ function buildInstructions() {
     "'Last week' means the previous full week, Monday to Sunday. " +
     "Always pass dates as YYYY-MM-DD. " +
     "For counts of applications, always use the count_application tool. " +
-    "Never ask the user for their user ID."
+    "Never ask the user for their user ID."+
+
+    "For counts of applications, always use the count_application tool. " +
+    "For details of latest/recent applications, use the get_recent_applications tool. " +
+    // WHY: tool na ho to LLM user se data maangne lagta hai, ye line us behavior ko rokti hai
+    "If no tool can answer the question, say you cannot do that yet. " +
+    "Never ask the user to provide their application data or their user ID."+
+ 
+    // Yahan naya instruction add kiya gaya hai jo simple greetings ko short rakhega:
+    "Always detect the user's language and respond concisely. " +
+    "If the user sends a simple greeting (like 'hi', 'hello', 'namaste', or equivalent in any language), " +
+    "reply with a short, friendly greeting in that exact same language. " +
+    "Do not list features, menus, bullet points, or examples unless the user explicitly asks for help."
   );
 }
 
@@ -37,7 +49,7 @@ export async function askAssistant(userId, question) {
 
   let response = await openai.responses.create({
     model: MODEL,
-    max_output_tokens: 2000, // reasoning tokens bhi isi me ginte hain
+    max_output_tokens: 500, // reasoning tokens bhi isi me ginte hain
     instructions: buildInstructions(),
     input: question,
     tools: toolDefinitions,
@@ -97,7 +109,7 @@ export async function askAssistant(userId, question) {
  
     response = await openai.responses.create({
       model: MODEL,
-      max_output_tokens: 2000,
+      max_output_tokens: 500,
       instructions:
         "Answer the user's question using the database result. " +
         "Keep the answer simple and accurate.",

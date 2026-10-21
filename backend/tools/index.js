@@ -1,9 +1,10 @@
 import countApplications from "./countApplications.tool.js";
+import getRecentApplications from "./getRecentApplications.tool.js";
 
 
 // WHAT: saare available tools ki list.
 // WHY: naya tool jodna ho to yahan sirf ek import + list me ek entry. Baaki code nahi chhedna.
-const tools = [countApplications];
+const tools = [countApplications,getRecentApplications];
 
 // WHAT: sirf definitions ki list (LLM ke liye).
 // WHY: openai.responses.create({ tools }) me yahi bhejni hoti hai. LLM ko function ka
