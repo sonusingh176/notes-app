@@ -34,7 +34,11 @@ function buildInstructions() {
     "Always detect the user's language and respond concisely. " +
     "If the user sends a simple greeting (like 'hi', 'hello', 'namaste', or equivalent in any language), " +
     "reply with a short, friendly greeting in that exact same language. " +
-    "Do not list features, menus, bullet points, or examples unless the user explicitly asks for help."
+    "Do not list features, menus, bullet points, or examples unless the user explicitly asks for help." +
+
+    // instruction for automated job application filler
+    "To add a new application, use the propose_add_application tool. It never saves " +
+    "anything; tell the user to review the preview and confirm. Never say it is saved. " 
   );
 }
 
