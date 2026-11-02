@@ -51,13 +51,19 @@ export async function askAssistant(userId, question) {
   // WHY max_output_tokens 2000: GPT-5 ki "soch" (reasoning) ke tokens bhi isi limit me ginte hain,
   //      kam rakha to soch me hi khatam ho kar jawab khaali aa sakta hai.
 
+  let pendingAction = null; // naya: proposal ki info yahan jama hogi
+ 
+
+
   let response = await openai.responses.create({
     model: MODEL,
-    max_output_tokens: 500, // reasoning tokens bhi isi me ginte hain
+    max_output_tokens: 800, // reasoning tokens bhi isi me ginte hain
     instructions: buildInstructions(),
     input: question,
     tools: toolDefinitions,
   });
+
+  assertComplete(response,"first call");
 
   // STEP 2: dekho LLM ne tool maanga hai ya nahi.
   for (const item of response.output) {
@@ -111,9 +117,19 @@ export async function askAssistant(userId, question) {
     // WHY poori conversation input me: OpenRouter stateless hai (previous_response_id support
     //      nahi karta, 400 error deta hai), isliye server ko history yaad nahi rehti, hume bhejni padti hai.
  
+
+     // WHAT: tool ne proposal banaya ho to uski id + preview alag rakh lo.
+    // WHY: frontend ko Confirm button AI ke text se nahi, backend ke structured data se dikhana hai.
+    // AI text me galti kar sakta hai ("save ho gaya"), par ye data sach hai.
+  
+    if (toolResult?.pendingActionId) {
+      pendingAction = { id: toolResult.pendingActionId, preview: toolResult.preview };
+    }
+
     response = await openai.responses.create({
       model: MODEL,
-      max_output_tokens: 500,
+      max_output_tokens: 2000,
+      // reasoning: { effort: "low" }, 
       instructions:
         "Answer the user's question using the database result. " +
         "Keep the answer simple and accurate.",
@@ -163,6 +179,8 @@ export async function askAssistant(userId, question) {
         // WHY tools dobara: continuation call me bhi tools ki list dena zaroori hai.
       tools: toolDefinitions,
     });
+
+    assertComplete(response,"second call");
   }
 
 
@@ -171,5 +189,22 @@ export async function askAssistant(userId, question) {
 | FINAL AI ANSWER
 |--------------------------------------------------------------------------
 */
-  return response.output_text;
+  // return response.output_text;
+  return { answer: response.output_text, pendingAction };
+}
+
+// WHAT: response adhura ho to error do, chupchap success mat bhejo.
+// WHY: warna "answer": "" jaisa bug dikhta hi nahi, aur dhoondhna mushkil hota hai.
+// function assertComplete(response) {
+//   if (response.status === "incomplete") {
+//     throw new Error(`AI response incomplete: ${response.incomplete_details?.reason}`);
+//   }
+// }
+
+function assertComplete(response, label) {
+  // WHAT: kitne tokens soch me gaye, ye dikhata hai
+  console.log(label, response.status, response.usage?.output_tokens_details);
+  if (response.status === "incomplete") {
+    throw new Error(`AI response incomplete at ${label}: ${response.incomplete_details?.reason}`);
+  }
 }
