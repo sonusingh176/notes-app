@@ -2,7 +2,7 @@ import express from "express";
 
 import { authenticate } from "../middleware/auth.js";
 
-import { askAI } from "../controllers/aiController.js";
+import { askAI,confirmAction ,cancelAction} from "../controllers/aiController.js";
 
 
 const router = express.Router();
@@ -33,6 +33,9 @@ router.post(
     authenticate,
     askAI
 );
+
+router.post("/actions/:id/confirm", authenticate, confirmAction);
+router.post("/actions/:id/cancel", authenticate, cancelAction);
 
 
 export default router;

@@ -289,8 +289,10 @@
 
 // ==============================================
 
-
+import mongoose from "mongoose";
 import { askAssistant } from "../services/aiService.js";
+import { confirmPendingAction, cancelPendingAction } from "../services/actionExecutor.js";
+
 
 // WHAT: POST /api/ai/ask ka controller. Sirf request ko sambhalta hai, AI ka kaam service karti hai.
 // WHY patla: controller me AI ka loop hota to tool/prompt badalne par controller chhedna padta.
@@ -298,6 +300,7 @@ import { askAssistant } from "../services/aiService.js";
 const askAI = async (req, res, next) => {
   try {
     const { question } = req.body;
+  
 
     // WHY validate: khaali ya string ke alawa kuch bhi aaye to AI ko bhejna paise barbaad karna hai.
    
@@ -309,12 +312,47 @@ const askAI = async (req, res, next) => {
     //      body se nahi, taaki koi dusre ki id bhej kar uska data na maange.
  
     // userId hamesha req.user se aayegi, body se kabhi nahi
-    const answer = await askAssistant(req.user._id, question);
+    const{ answer, pendingAction } = await askAssistant(req.user._id, question);
 
-    return res.status(200).json({ success: true, question, answer });
+    return res.status(200).json({ success: true, question, answer ,pendingAction });
   } catch (error) {
     next(error);
   }
 };
 
-export { askAI };
+
+// WHAT: user ke Confirm button ka endpoint. AI iska hissa nahi hai.
+const confirmAction = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    // WHY: galat format ki id par Mongoose crash na kare
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ success: false, message: "Invalid id." });
+    }
+    const result = await confirmPendingAction(req.user._id, id);
+    if (!result.ok) {
+      return res.status(result.status).json({ success: false, message: result.message });
+    }
+    return res.status(201).json({ success: true, message: "Application saved.", data: result.data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const cancelAction = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ success: false, message: "Invalid id." });
+    }
+    const result = await cancelPendingAction(req.user._id, id);
+    if (!result.ok) {
+      return res.status(result.status).json({ success: false, message: result.message });
+    }
+    return res.status(200).json({ success: true, message: "Cancelled." });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { askAI , confirmAction, cancelAction };
