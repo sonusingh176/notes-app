@@ -1,119 +1,169 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { Bot, Send, X } from "lucide-react";
 
 import { aiApi } from "@/lib/api";
 
-/*
- * Basic chat window.
- *
- * For now this is UI-only. The send button adds the user's message and
- * shows a small placeholder response. In the next step we can connect
- * this component to POST /ai/ask through the existing Axios client.
- */
+// welcome message ke neeche ke options. Click par ye text seedha AI ko jaata hai (fixed jawab nahi)
+const WELCOME_OPTIONS = [
+  "Total kitni jobs apply ki?",
+  "Last applied job kaunsi hai?",
+  "Naya application add karna hai",
+];
+
+const welcomeMessage = () => ({
+  id: 1,
+  role: "assistant",
+  content: "Hi! How can I help you?",
+  options: WELCOME_OPTIONS,
+  isWelcome: true,
+});
+
+// WHAT: pichle 6 messages backend ke format me.
+// WHY: AI ko context chahiye, warna "Indore" jaisa chhota jawab samajh nahi aayega.
+// welcome aur error messages history me nahi jaate.
+const buildHistory = (msgs) =>
+  msgs
+    .filter((m) => !m.isWelcome && !m.isError && m.content)
+    .slice(-6)
+    .map((m) => ({ role: m.role, content: m.content }));
+
+// button styles: pill (welcome options) aur stacked (Confirm/Cancel), reference jaisa
+const pillBtn =
+  "rounded-md border border-[var(--accent)] px-3 py-1.5 text-xs text-[var(--accent)] transition hover:bg-[var(--accent)] hover:text-white";
+const stackBtn =
+  "w-full rounded-md border px-4 py-2 text-center text-sm font-medium transition disabled:opacity-50";
+const confirmBtn = `${stackBtn} border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)] hover:text-white`;
+const cancelBtn = `${stackBtn} border-[var(--border)] text-[var(--text-secondary)] hover:bg-white/5`;
+
+// WHAT: AI ke proposal ka summary + Confirm/Cancel buttons (bubble ke andar).
+// WHY: summary backend ke data se aati hai, AI ke text se nahi, kyunki AI text me galti kar sakta hai.
+function PendingCard({ action, onConfirm, onCancel }) {
+  const p = action.preview;
+  const busy = action.status === "processing";
+  const active = action.status === "pending" || busy; // resolve hote hi buttons hat jaate hain
+
+  return (
+    <div className="mt-3 border-t border-[var(--border)] pt-3">
+      <div className="space-y-0.5 text-[var(--text-secondary)]">
+        <p>Company: <span className="text-[var(--text-primary)]">{p.companyName}</span></p>
+        <p>Role: <span className="text-[var(--text-primary)]">{p.role}</span></p>
+        <p>Location: <span className="text-[var(--text-primary)]">{p.location}</span></p>
+        <p>Work mode: <span className="text-[var(--text-primary)]">{p.workMode}</span></p>
+        <p>Applied: <span className="text-[var(--text-primary)]">{new Date(p.appliedDate).toLocaleDateString()}</span></p>
+      </div>
+
+      {active && (
+        <div className="mt-3 space-y-2">
+          <button type="button" onClick={onConfirm} disabled={busy} className={confirmBtn}>
+            {busy ? "Saving..." : "✓ Confirm & Save"}
+          </button>
+          <button type="button" onClick={onCancel} disabled={busy} className={cancelBtn}>
+            Cancel
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ChatbotWindow({ onClose }) {
   const [message, setMessage] = useState("");
-
- /*
-  |--------------------------------------------------------------------------
-  | CHAT MESSAGES
-  |--------------------------------------------------------------------------
-  |
-  | Initially the AI sends a greeting.
-  |
-  |--------------------------------------------------------------------------
-  */
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      role: "assistant",
-      content: "Hi! How can I help you?",
-    },
-  ]);
-
+  const [messages, setMessages] = useState(() => [welcomeMessage()]);
   const [isLoading, setIsLoading] = useState(false);
 
+  const nextId = useRef(2); // welcome ki id 1 hai
+  const bottomRef = useRef(null);
 
+  // naya message aate hi neeche scroll
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isLoading]);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  // WHY id updater ke bahar: React dev me updater 2 baar chala sakta hai
+  const addMessage = (msg) => {
+    const id = nextId.current++;
+    setMessages((prev) => [...prev, { id, ...msg }]);
+  };
 
-    const text = message.trim(); // Remove unnecessary spaces.
+  // kisi ek proposal (id se) ka status badalna
+  const updateAction = (id, patch) =>
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.pendingAction?.id === id
+          ? { ...m, pendingAction: { ...m.pendingAction, ...patch } }
+          : m
+      )
+    );
+
+  // WHAT: sawal AI ko bhejna. Form aur welcome options dono isi se chalte hain.
+  const sendQuestion = async (text) => {
     if (!text || isLoading) return;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Add user's message to UI immediately.
-    |--------------------------------------------------------------------------
-    |
-    | We don't wait for the backend before displaying it.
-    |
-    |--------------------------------------------------------------------------
-    */
+    // history naye message se PEHLE ki baatcheet se banti hai
+    const history = buildHistory(messages);
 
-
-    const userMessage={
-       id: Date.now(),//is NOT the user's ID
-       role: "user",
-       content: text,
-    }
-
-    // Add the user's message to the chat.
-    setMessages((previous) => [
-      ...previous,
-       userMessage,
-    ]);
-
-    setMessage("");//Clear input box.
-
+    addMessage({ role: "user", content: text });
     setIsLoading(true);
 
     try {
-        const response = await aiApi.ask(text);
-
-        const assistantMessage = {
-            id: Date.now() + 1,
-            role: "assistant",
-            content:
-            response?.answer ||
-            "I couldn't generate an answer.",
-        };
-        //Add AI response to chat.
-        setMessages((previous) => [
-            ...previous,
-            assistantMessage,
-        ])
-
+      const response = await aiApi.ask(text, history);
+      addMessage({
+        role: "assistant",
+        content:
+          response?.answer ||
+          (response?.pendingAction
+            ? "Maine ye application taiyaar kiya hai. Review karke Confirm dabao."
+            : "I couldn't generate an answer."),
+        // pendingAction ho to bubble ke andar Confirm/Cancel dikhenge
+        pendingAction: response?.pendingAction
+          ? { ...response.pendingAction, status: "pending" }
+          : null,
+      });
     } catch (error) {
-          console.error("AI Assistant Error:", error);
-          const errorMessage = {
-            id: Date.now() + 1,
-            role: "assistant",
-            content:
-            error?.message ||
-            "Something went wrong. Please try again.",
-        };
-
-         setMessages((previous) => [
-            ...previous,
-            errorMessage,
-        ]);
+      console.error("AI Assistant Error:", error);
+      addMessage({
+        role: "assistant",
+        content: error?.message || "Something went wrong. Please try again.",
+        isError: true,
+      });
     } finally {
-         setIsLoading(false);
+      setIsLoading(false);
     }
+  };
 
-    // Temporary response until the backend AI API is connected.
-    // setTimeout(() => {
-    //   setMessages((previous) => [
-    //     ...previous,
-    //     {
-    //       id: Date.now() + 1,
-    //       role: "assistant",
-    //       content: "I received your message. AI integration will be connected next.",
-    //     },
-    //   ]);
-    // }, 400);
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const text = message.trim();
+    if (!text) return;
+    setMessage("");
+    sendQuestion(text);
+  };
+
+  // WHAT: Confirm/Cancel dabane par choice user bubble me dikhta hai, phir bot jawab deta hai.
+  const handleAction = async (id, type) => {
+    updateAction(id, { status: "processing" });
+    addMessage({ role: "user", content: type === "confirm" ? "Confirm" : "Cancel" });
+
+    try {
+      await aiApi[type](id); // aiApi.confirm(id) ya aiApi.cancel(id)
+      updateAction(id, { status: "done" });
+      addMessage(
+        type === "confirm"
+          ? { role: "assistant", content: "✓ Application save ho gayi.", showJobsLink: true }
+          : { role: "assistant", content: "Theek hai, cancel kar diya." }
+      );
+    } catch (error) {
+      // 404 = expire ho gaya ya pehle hi use ho chuka, dobara try bekaar. Baaki errors me retry theek hai.
+      updateAction(id, { status: error?.status === 404 ? "done" : "pending" });
+      addMessage({
+        role: "assistant",
+        content: error?.message || "Kuch gadbad hui. Dobara try karo.",
+        isError: true,
+      });
+    }
   };
 
   return (
@@ -124,14 +174,9 @@ export default function ChatbotWindow({ onClose }) {
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent)]/15 text-[var(--accent)]">
             <Bot size={20} />
           </div>
-
           <div>
-            <h2 className="text-sm font-semibold text-[var(--text-primary)]">
-              AI Assistant
-            </h2>
-            <p className="text-xs text-[var(--text-secondary)]">
-              Ask about your job applications
-            </p>
+            <h2 className="text-sm font-semibold text-[var(--text-primary)]">AI Assistant</h2>
+            <p className="text-xs text-[var(--text-secondary)]">Ask about your job applications</p>
           </div>
         </div>
 
@@ -150,61 +195,64 @@ export default function ChatbotWindow({ onClose }) {
         {messages.map((item) => (
           <div
             key={item.id}
-            className={`flex ${
-              item.role === "user" ? "justify-end" : "justify-start"
-            }`}
+            className={`flex ${item.role === "user" ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-sm leading-5 ${
+              className={`max-w-[88%] rounded-2xl px-3.5 py-2.5 text-sm leading-5 ${
                 item.role === "user"
                   ? "rounded-br-md bg-[var(--accent)] text-white"
+                  : item.isError
+                  ? "rounded-bl-md border border-red-500/40 bg-[var(--bg-card)] text-red-400"
                   : "rounded-bl-md border border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-primary)]"
               }`}
             >
-              {item.content}
+              <p className="whitespace-pre-wrap">{item.content}</p>
+
+              {item.showJobsLink && (
+                <Link href="/dashboard/jobs" className="mt-2 inline-block text-[var(--accent)] underline">
+                  View jobs
+                </Link>
+              )}
+
+              {/* welcome options: sirf tab tak jab tak user ne kuch bheja nahi */}
+              {item.options && messages.length === 1 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {item.options.map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      disabled={isLoading}
+                      onClick={() => sendQuestion(option)}
+                      className={pillBtn}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {item.pendingAction && (
+                <PendingCard
+                  action={item.pendingAction}
+                  onConfirm={() => handleAction(item.pendingAction.id, "confirm")}
+                  onCancel={() => handleAction(item.pendingAction.id, "cancel")}
+                />
+              )}
             </div>
           </div>
         ))}
 
-         {/* LOADING MESSAG */}
+        {/* Loading message */}
         {isLoading && (
-
           <div className="flex justify-start">
-
-            <div
-              className="
-                rounded-2xl
-                rounded-bl-md
-
-                border
-                border-[var(--border)]
-
-                bg-[var(--bg-card)]
-
-                px-4
-                py-3
-
-                text-sm
-                text-[var(--text-secondary)]
-              "
-            >
-
-              <div className="flex items-center gap-1">
-
-                <span>Thinking</span>
-
-                <span className="animate-pulse">
-                  ...
-                </span>
-
-              </div>
-
+            <div className="rounded-2xl rounded-bl-md border border-[var(--border)] bg-[var(--bg-card)] px-4 py-3 text-sm text-[var(--text-secondary)]">
+              <span>Thinking</span>
+              <span className="animate-pulse">...</span>
             </div>
-
           </div>
-
         )}
 
+        <div ref={bottomRef} />
       </div>
 
       {/* Message input */}
@@ -218,15 +266,15 @@ export default function ChatbotWindow({ onClose }) {
             value={message}
             onChange={(event) => setMessage(event.target.value)}
             placeholder="Ask something..."
+            maxLength={300}
             disabled={isLoading}
             className="min-w-0 flex-1 bg-transparent px-2 text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-secondary)]"
           />
-
           <button
             type="submit"
             aria-label="Send message"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--accent)] text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={!message.trim()|| isLoading}
+            disabled={!message.trim() || isLoading}
           >
             <Send size={17} />
           </button>
