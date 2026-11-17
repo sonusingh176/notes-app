@@ -299,7 +299,7 @@ import { confirmPendingAction, cancelPendingAction } from "../services/actionExe
 
 const askAI = async (req, res, next) => {
   try {
-    const { question } = req.body;
+    const { question , history = []} = req.body;
   
 
     // WHY validate: khaali ya string ke alawa kuch bhi aaye to AI ko bhejna paise barbaad karna hai.
@@ -308,11 +308,26 @@ const askAI = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "Question is required." });
     }
 
+     // WHY: lambe text se paisa (tokens) barbaad na ho
+    if (question.length > 300) {
+      return res.status(400).json({ success: false, message: "Question 300 characters se chhota rakho." });
+    }
+
+      // WHY: history browser se aati hai (untrusted), isliye shape aur size check karo
+    if (!Array.isArray(history) || history.length > 10) {
+      return res.status(400).json({ success: false, message: "Invalid history." });
+    }
+    const cleanHistory = history
+      .filter((h) => h && ["user", "assistant"].includes(h.role) && typeof h.content === "string")
+      .map((h) => ({ role: h.role, content: h.content.slice(0, 1000) }));
+
+
+
      // WHY req.user._id: user ki id hamesha login token (authenticate middleware) se aati hai,
     //      body se nahi, taaki koi dusre ki id bhej kar uska data na maange.
  
     // userId hamesha req.user se aayegi, body se kabhi nahi
-    const{ answer, pendingAction } = await askAssistant(req.user._id, question);
+    const{ answer, pendingAction } = await askAssistant(req.user._id, question,cleanHistory);
 
     return res.status(200).json({ success: true, question, answer ,pendingAction });
   } catch (error) {

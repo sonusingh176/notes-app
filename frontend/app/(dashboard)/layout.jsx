@@ -6,6 +6,8 @@ import { useAuth } from "@/context/AuthContext";
 import Sidebar from "@/components/dashboard/Sidebar";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import Chatbot from "@/components/chatbot/Chatbot";
+import ChatWidget from "@/components/dashboard/ChatWidget";
+
 
 export default function DashboardLayout({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -34,6 +36,7 @@ export default function DashboardLayout({ children }) {
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           {children}
         </main>
+        <ChatWidget />
          {/*
          * This layout wraps every authenticated user dashboard page,
          * so the AI chatbot appears on all user pages automatically.
