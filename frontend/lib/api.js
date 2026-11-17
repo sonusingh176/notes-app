@@ -116,6 +116,11 @@ export const publicApi = {
 // Isliye chatbot request ke saath hume manually token bhejne ki zarurat nahi.
 // -----------------------------------------------------------------------------
 
+// AI assistant ke 3 endpoints (ask ke saath pichli baatcheet bhi jaati hai)
 export const aiApi={
   ask:(question)=>client.post('ai/ask',{question}),
+
+  confirm: (id) => client.post(`/ai/actions/${id}/confirm`),
+  cancel: (id) => client.post(`/ai/actions/${id}/cancel`),
+
 }

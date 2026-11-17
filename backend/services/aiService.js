@@ -38,7 +38,10 @@ function buildInstructions() {
 
     // instruction for automated job application filler
     "To add a new application, use the propose_add_application tool. It never saves " +
-    "anything; tell the user to review the preview and confirm. Never say it is saved. " 
+    "anything; tell the user to review the preview and confirm. Never say it is saved. " +
+
+    "If the user wants to add an application but has not given company, role and location, ask for them in one short message and give a short example, like: Applied for Infosys Backend Developer role (Indore)." +
+    "After proposing an application, tell the user to press the Confirm button below. Never offer to save, change or edit anything in chat."
   );
 }
 
@@ -46,7 +49,8 @@ function buildInstructions() {
 // WHY userId alag parameter: userId controller se (JWT wale req.user se) aati hai, LLM se nahi.
 //      Warna prompt injection se koi dusre user ka data nikalwa sakta hai.
 
-export async function askAssistant(userId, question) {
+// (a) signature me history
+export async function askAssistant(userId, question, history = []) {
   // STEP 1: sawal + tools ki list LLM ko bhejo.
   // WHY max_output_tokens 2000: GPT-5 ki "soch" (reasoning) ke tokens bhi isi limit me ginte hain,
   //      kam rakha to soch me hi khatam ho kar jawab khaali aa sakta hai.
@@ -54,12 +58,16 @@ export async function askAssistant(userId, question) {
   let pendingAction = null; // naya: proposal ki info yahan jama hogi
  
 
+  // (b) pichli baatcheet + naya sawal ek hi list me
+  const messages = [...history, { role: "user", content: question }];
+
 
   let response = await openai.responses.create({
     model: MODEL,
     max_output_tokens: 800, // reasoning tokens bhi isi me ginte hain
     instructions: buildInstructions(),
-    input: question,
+    // input: question,
+     input: messages,
     tools: toolDefinitions,
   });
 
@@ -158,11 +166,15 @@ export async function askAssistant(userId, question) {
                 */
       input: [
         // 1. user ka original sawal
-        { role: "user", content: question },
+        // { role: "user", content: question },
          // 2. model ka pehla output (reasoning + function_call), jaisa mila waisa hi
          // 2. LLM ka pehla output (reasoning + function_call), jaisa mila waisa hi.
         //    WHY: model ko apni soch wapas chahiye, aur function_call se hi pata chalta
         //    hai ki neeche wala result kis request ka hai.
+
+        ...messages, // pehle { role: "user", content: question } tha, ab poori baatcheet
+
+
         ...response.output,
          // 3. tool ka result.
         //    call_id match karna zaroori hai, isi se result sahi request se judta hai.
