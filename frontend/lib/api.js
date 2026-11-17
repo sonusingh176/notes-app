@@ -118,7 +118,8 @@ export const publicApi = {
 
 // AI assistant ke 3 endpoints (ask ke saath pichli baatcheet bhi jaati hai)
 export const aiApi={
-  ask:(question)=>client.post('ai/ask',{question}),
+// history bhi bhejo, warna AI ko pichli baatcheet yaad nahi rahegi
+ask: (question, history = []) => client.post("/ai/ask", { question, history }),
 
   confirm: (id) => client.post(`/ai/actions/${id}/confirm`),
   cancel: (id) => client.post(`/ai/actions/${id}/cancel`),
