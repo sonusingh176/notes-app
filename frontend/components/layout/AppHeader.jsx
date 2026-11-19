@@ -35,7 +35,7 @@ export default function AppHeader() {
               onClick={toggleTheme}
               className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-gray-300 hover:bg-white/5"
             >
-              {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
+              {theme === "dark" ? "☀️" : "🌙"}
             </button>
             <button
               onClick={handleTrackJob}
@@ -45,7 +45,7 @@ export default function AppHeader() {
             </button>
             {loading ? null : isAuthenticated ? (
               <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-300">Hi, {user.name}</span>
+                <span  className={styles.userAvatar}>  {user?.name?.charAt(0).toUpperCase()}</span>
                 <button className={styles.loginBtn} onClick={logout}>Logout</button>
               </div>
             ) : (
