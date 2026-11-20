@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { publicApi } from "@/lib/api";
+import { BookOpen, Sparkles, MousePointer2 } from "lucide-react";
 
 export default function SubjectSection() {
   const [subjects, setSubjects] = useState([]);
@@ -67,6 +68,41 @@ export default function SubjectSection() {
           <p className="text-sm text-gray-400">No subjects added yet.</p>
         )}
       </div>
+
+      {/* Default state */}
+    {!activeSubject && (
+      <div className="mt-10 rounded-2xl border border-white/10 bg-[#13192b] px-6 py-12 text-center shadow-xl">
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#b480ff]/10 text-[#b480ff]">
+          <BookOpen size={30} />
+        </div>
+
+        <h3 className="text-xl font-semibold text-white">
+          Prepare for Your Interview
+        </h3>
+
+        <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-gray-400">
+          Explore interview questions by topic, test your knowledge,
+          and review answers to strengthen your preparation.
+        </p>
+
+        <div className="mt-6 flex items-center justify-center gap-2 text-sm text-[#b480ff]">
+          <MousePointer2 size={16} />
+          <span>Select a subject above to get started</span>
+        </div>
+
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-gray-300">
+            <BookOpen size={16} />
+            {subjects.length} Subjects
+          </div>
+
+          <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-gray-300">
+            <Sparkles size={16} />
+            Practice & Learn
+          </div>
+        </div>
+      </div>
+    )}
 
       {/* Questions card */}
       {activeSubject && (

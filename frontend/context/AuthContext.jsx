@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { authApi, getToken, removeToken, setToken } from "@/lib/api";
-import { useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const AuthContext = createContext(null);
 
@@ -13,7 +13,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const getDashboardRoute = (user) => {
-   
+
     if (user.role === "super_admin") router.replace("/admin");
     else router.replace("/dashboard");
   };
@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
   const saveUser = (user) => {
     localStorage.setItem("user", JSON.stringify(user));
     setUser(user);
-   
+
   };
 
   useEffect(() => {
@@ -49,13 +49,13 @@ export function AuthProvider({ children }) {
   };
 
   // Google login: backend se JWT lo, save karo, role ke hisaab se redirect
-const googleLogin = async (credential) => {
-  const res = await authApi.google(credential);
-  setToken(res.token);
-  saveUser(res.user);
-  getDashboardRoute(res.user);
-  return res;
-};
+  const googleLogin = async (credential) => {
+    const res = await authApi.google(credential);
+    setToken(res.token);
+    saveUser(res.user);
+    getDashboardRoute(res.user);
+    return res;
+  };
 
   const logout = () => {
     removeToken();
@@ -65,7 +65,7 @@ const googleLogin = async (credential) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, setUser, login,googleLogin, isAuthenticated: !!user, logout }}>
+    <AuthContext.Provider value={{ user, loading, setUser, login, googleLogin, isAuthenticated: !!user, logout }}>
       {children}
     </AuthContext.Provider>
   );
