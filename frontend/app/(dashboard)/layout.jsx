@@ -9,7 +9,7 @@ import Chatbot from "@/components/chatbot/Chatbot";
 
 
 export default function DashboardLayout({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading,user } = useAuth();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

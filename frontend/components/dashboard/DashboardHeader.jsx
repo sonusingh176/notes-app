@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
+import { Menu } from "lucide-react";
 
 export default function DashboardHeader({ onMenuClick }) {
   const { user, logout } = useAuth();
@@ -17,6 +18,9 @@ export default function DashboardHeader({ onMenuClick }) {
       >
         ☰
       </button>
+
+
+
       <div className="hidden lg:block" />
 
       <div className="flex items-center gap-3">

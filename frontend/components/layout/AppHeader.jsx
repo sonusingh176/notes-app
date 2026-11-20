@@ -8,13 +8,20 @@ import LoginModal from "@/components/auth/LoginModal";
 import RegistrationModal from "@/components/auth/RegistrationModal";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
-import { Menu } from 'lucide-react';
+
+import {
+  Menu,
+  ChevronDown,
+  ChevronUp,
+  UserRound,
+  LogOut,
+} from "lucide-react";
 
 export default function AppHeader() {
   const [openLogin, setOpenLogin] = useState(false);
   const [openRegister, setOpenRegister] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const { user, isAuthenticated, logout, loading } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
@@ -23,7 +30,8 @@ export default function AppHeader() {
     setMenuOpen(false);
 
     if (isAuthenticated) {
-      router.push("/dashboard");
+      // router.push("/dashboard");
+      router.push(user?.role === "super_admin" ? "/admin/dashboard" : "/dashboard");
     } else {
       setOpenLogin(true);
     }
@@ -45,31 +53,85 @@ export default function AppHeader() {
         <div className={styles.container}>
           <h2 className={styles.logo}>Novice Developer</h2>
 
+
           {/* Desktop navigation */}
           <div className={styles.navButtons}>
+            {/* Theme toggle */}
             <button
               onClick={toggleTheme}
-              className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-gray-300 hover:bg-white/5"
+              className={styles.desktopThemeButton}
             >
-              {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
+              {theme === "dark" ? "Light ☀️" : "Dark 🌙"}
             </button>
 
-            <button
-              onClick={handleTrackJob}
-              className="rounded-lg bg-gradient-to-r from-indigo-600 to-[#b480ff] px-4 py-1.5 text-sm font-semibold text-white"
-            >
-              Track Job
-            </button>
+            {/* Track Job */}
+            {user?.role !== "super_admin" && (
+              <button
+                onClick={handleTrackJob}
+                className="rounded-lg bg-gradient-to-r from-indigo-600 to-[#b480ff] px-4 py-1.5 text-sm font-semibold text-white"
+              >
+                Track Job
+              </button>
+            )}
 
+            {/* Authentication */}
             {loading ? null : isAuthenticated ? (
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-300">
-                  {user.name}
-                </span>
+              <div className={styles.userDropdownWrapper}>
+                <button
+                  className={styles.userDropdownTrigger}
+                  onClick={() => setUserDropdownOpen((prev) => !prev)}
+                >
+                  <div className={styles.desktopAvatar}>
+                    {user?.name?.charAt(0)?.toUpperCase() || "U"}
+                  </div>
 
-                <button className={styles.loginBtn} onClick={handleLogout}>
-                  Logout
+                  <span className={styles.desktopUserName}>
+                    {user.name}
+                  </span>
+
+                  {userDropdownOpen ? (
+                    <ChevronUp size={16} />
+                  ) : (
+                    <ChevronDown size={16} />
+                  )}
                 </button>
+
+                {/* Dropdown */}
+                {userDropdownOpen && (
+                  <div className={styles.userDropdown}>
+                    <div className={styles.dropdownProfile}>
+                      <p className={styles.dropdownName}>
+                        {user.name}
+                      </p>
+
+                      <p className={styles.dropdownEmail}>
+                        {user.email}
+                      </p>
+                    </div>
+
+                    <button
+                      className={styles.dropdownItem}
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        router.push(user?.role === "super_admin" ? "/admin/dashboard" : "/dashboard");
+                      }}
+                    >
+                      <UserRound size={18} />
+                      <span>Dashboard</span>
+                    </button>
+
+                    <button
+                      className={`${styles.dropdownItem} ${styles.dropdownLogout}`}
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        handleLogout();
+                      }}
+                    >
+                      <LogOut size={18} />
+                      <span>Sign out</span>
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <button
@@ -80,6 +142,7 @@ export default function AppHeader() {
               </button>
             )}
           </div>
+
 
           {/* Mobile header actions */}
           <div className={styles.mobileHeaderActions}>

@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { House } from 'lucide-react';
+
 
 // Sidebar ke navigation links — yahan se naya admin section add karna easy hai
 const navItems = [
   { label: "Dashboard", href: "/admin/dashboard", icon: "📊" },
   { label: "Subjects", href: "/admin/subject", icon: "📁" },
   { label: "Questions", href: "/admin/questions", icon: "❓" },
+  { label: "Home", href:"/" ,icon:<House />}
 ];
 
 export default function Sidebar() {
