@@ -43,6 +43,7 @@ const signToken = (userId) =>
  *    apne-aap hash ho jaayega (User.js dekho)
  * 3. JWT token generate karo aur response bhejo
  */
+
 const register = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
@@ -86,7 +87,10 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
+  
     const user = await User.findOne({ email }).select('+password');
+    //The + tells Mongoose to include a field that is excluded by default.
+    //In Mongoose, .select('+password') is used to include the password field in the query result, even if that field is hidden by default in your schema.
 
 
     // if (user.authProvider === 'google') {
