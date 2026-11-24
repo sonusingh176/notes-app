@@ -3,7 +3,7 @@
 import React from "react";
 import { DataTable } from "../../../components/ui/DataTable";
 
-const Customers = () => {
+const AdminUsersPage = () => {
   const columns = [
     {
       key: "name",
@@ -70,4 +70,4 @@ const Customers = () => {
   );
 };
 
-export default Customers;
+export default AdminUsersPage;

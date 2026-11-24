@@ -106,6 +106,10 @@ export const publicApi = {
   getQuestions: (subjectId) => client.get(`/question/public/${subjectId}`),
 };
 
+export const userApi={
+  getAll:()=>client.get("admin/users"),
+}
+
 // AI Assistant API
 // -----------------------------------------------------------------------------
 // Chatbot se related saari API calls yahan rakhenge.

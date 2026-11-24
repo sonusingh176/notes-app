@@ -36,6 +36,7 @@ import authRoutes from './routes/authRoutes.js';
 import subjectRoutes from './routes/subjectRoutes.js';
 import questionRoutes from './routes/questionRoutes.js'
 import jobApplicationRoutes  from './routes/JobApplicationRoutes.js';
+import adminUserRoutes from "./routes/adminUserRoutes.js"
 import aiRoutes from './routes/aiRoutes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
@@ -66,6 +67,7 @@ app.use('/api/auth', authRoutes); // register, login, me
 app.use('/api/subject',subjectRoutes);
 app.use('/api/question',questionRoutes);
 app.use('/api/job-applications', jobApplicationRoutes);
+app.use('/api/admin/users',adminUserRoutes);
 
 
 // AI routes
