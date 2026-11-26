@@ -1,9 +1,23 @@
 "use client";
 
-import React from "react";
+
+import { useState,useEffect } from "react";
 import { DataTable } from "../../../components/ui/DataTable";
+import { registeredUserApi } from "@/lib/api";
 
 const AdminUsersPage = () => {
+
+  const [users,setUsers]= useState([]);
+  const [loading,setLoading]=useState(true);
+  
+  useEffect(()=>{
+    registeredUserApi.getAll()
+      .then((res)=>setUsers(res.users))
+      .catch(console.error)
+      .finally(()=>setLoading(false));
+  },[]);
+
+
   const columns = [
     {
       key: "name",
@@ -27,32 +41,17 @@ const AdminUsersPage = () => {
       key: "status",
       header: "Status",
       accessorKey: "status",
+      sortable: true,
     },
   ];
 
-  const rows = [
-    {
-      _id: "1",
-      name: "Rahul Sharma",
-      email: "rahul@example.com",
-      phone: "9876543210",
-      status: "Active",
-    },
-    {
-      _id: "2",
-      name: "Priya Singh",
-      email: "priya@example.com",
-      phone: "9876543211",
-      status: "Inactive",
-    },
-    {
-      _id: "3",
-      name: "Amit Kumar",
-      email: "amit@example.com",
-      phone: "9876543212",
-      status: "Active",
-    },
-  ];
+  // Convert API data into table rows
+  const rows = users.map((user) => ({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    status: user.is_blocked ? "Blocked" : "Active",
+  }));
 
   return (
     <div className="space-y-4">
@@ -60,12 +59,16 @@ const AdminUsersPage = () => {
         Customers List
       </h1>
 
-      <DataTable
-        columns={columns}
-        rows={rows}
-        searchPlaceholder="Search customers..."
-        emptyMessage="No customers found."
-      />
+       {loading ? (
+        <p className="text-white">Loading customers...</p>
+      ) : (
+        <DataTable
+          columns={columns}
+          rows={rows}
+          searchPlaceholder="Search customers..."
+          emptyMessage="No customers found."
+        />
+      )}
     </div>
   );
 };
