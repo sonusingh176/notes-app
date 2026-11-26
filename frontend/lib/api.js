@@ -106,7 +106,7 @@ export const publicApi = {
   getQuestions: (subjectId) => client.get(`/question/public/${subjectId}`),
 };
 
-export const userApi={
+export const registeredUserApi={
   getAll:()=>client.get("admin/users"),
 }
 
