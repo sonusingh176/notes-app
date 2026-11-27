@@ -1,6 +1,6 @@
-import fs from "fs";
-
-
+// import fs from "fs";
+import { readFile } from 'node:fs/promises';
+import { extractTextFromPdfBuffer } from "../services/resumeTextService.js";
 
 
 // Upload the resume and return its basic information
@@ -16,7 +16,7 @@ const uploadResume = async(req,res,next)=>{
       }
 
     // Agar diskStorage hai to path se padho, warna memoryStorage ka buffer lo
-    const buffer= req.file.buffer || (await fs.readFile(req.file.path));
+    const buffer= req.file.buffer || (await readFile(req.file.path));
     const extractedText = await extractTextFromPdfBuffer(buffer);
 
     if(extractedText.length < 30){
@@ -43,11 +43,6 @@ const uploadResume = async(req,res,next)=>{
     } catch (error) {
         next(error);
     }
-
-     
-
-
-
 
 }
 
