@@ -70,6 +70,10 @@ export const authApi = {
   me: () => client.get("/auth/me"),
 };
 
+export const profileApi={
+  getProfile:()=>client.get("/profile"),
+};
+
 
 
 // Subject CRUD API

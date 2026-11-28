@@ -43,6 +43,7 @@ const profileSchema = new mongoose.Schema(
     // user se 1:1 (unique), ek user ka ek hi profile
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true, unique: true },
     fullName: { type: String, trim: true, maxlength: 100 },
+    email: {type: String,trim: true, maxlength: 100,},
     phone: { type: String, trim: true, maxlength: 20 },
     location: { type: String, trim: true, maxlength: 100 },
     headline: { type: String, trim: true, maxlength: 150 }, // jaise "Full-stack developer"

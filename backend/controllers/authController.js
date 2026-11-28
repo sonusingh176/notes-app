@@ -11,6 +11,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { OAuth2Client } from "google-auth-library";
+import Profile from '../models/Profile.js';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -56,6 +57,11 @@ const register = async (req, res, next) => {
     // role field nahi bheja — schema me default 'user' already set hai,
     // isliye public registration se kabhi super_admin nahi ban sakta
     const user = await User.create({ name, email, password });
+
+    await Profile.create({user:
+      user._id,
+      fullName:user.name
+    });
 
     const token = signToken(user._id);
 
